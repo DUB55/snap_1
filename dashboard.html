@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-4">kanker negers</h1>
+        <button id="toggleDailyEntries" class="mb-4 bg-blue-500 text-white py-2 px-4 rounded">
+            Show Today's Entries
+        </button>
+        <div id="dataDisplay" class="mt-6 p-4 bg-gray-50 rounded-md shadow-inner">
+            Loading...
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://enytadglgtpxrsnvldcu.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVueXRhZGdsZ3RweHJzbnZsZGN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2MTI1ODIsImV4cCI6MjA1NDE4ODU4Mn0.6xQ2Nre7WKS9XY3ma9QESKHvw3kTJNHela201b6al_4';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let showTodayOnly = false; // State to track if we are showing today's entries only
+
+        // Fetch and display data
+        async function loadData() {
+            const dataDisplay = document.getElementById('dataDisplay');
+            try {
+                const { data, error } = await supabase
+                    .from('inputs')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+                const filteredData = showTodayOnly ? data.filter(item => new Date(item.created_at).toISOString().split('T')[0] === today) : data;
+
+                if (filteredData && filteredData.length > 0) {
+                    dataDisplay.innerHTML = filteredData.map((item, index) => `
+                        <div class="text-lg mb-4 p-3 bg-white rounded shadow">
+                            <strong>Entry ${index + 1}</strong>
+                            <div class="mt-2">
+                                <div>Input 1: ${item.input1}</div>
+                                <div>Input 2: ${item.input2}</div>
+                                <div class="text-sm text-gray-500">
+                                    ${new Date(item.created_at).toLocaleString()}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    dataDisplay.innerHTML = '<p class="text-gray-500">No data available.</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                dataDisplay.innerHTML = '<p class="text-red-500">Error loading data. Please try again later.</p>';
+            }
+        }
+
+        // Toggle daily entries
+        document.getElementById('toggleDailyEntries').addEventListener('click', function() {
+            showTodayOnly = !showTodayOnly; // Toggle the state
+            this.textContent = showTodayOnly ? "Show All Entries" : "Show Today's Entries"; // Update button text
+            loadData(); // Reload data with the new filter
+        });
+
+        // Load data when page loads
+        loadData();
+
+        // Refresh data every 30 seconds
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html> 
