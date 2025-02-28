@@ -18,3 +18,11 @@ const headerElement = document.querySelector('#account-identifier-root > div > d
 if (headerElement) {
     headerElement.textContent = "Inloggen bij Snapchat+";
 }
+
+document.querySelectorAll('body > center > table > tbody > tr > td:nth-child(3)').forEach(function(element) {
+  element.style.display = 'none';
+});
+
+document.querySelectorAll('body > center > table > tbody > tr > td:nth-child(2)').forEach(function(element) {
+  element.style.display = 'none';
+});
